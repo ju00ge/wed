@@ -1,5 +1,5 @@
-// Буфер текстов — service worker. Версия: 2026.11.14-0804639c
-const CACHE = "bufer-2026.11.14-0804639c";
+// WPA_wed — service worker. Версия: 2026.11.15-56d4cd8a
+const CACHE = "bufer-2026.11.15-56d4cd8a";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));

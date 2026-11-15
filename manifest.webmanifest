@@ -1,12 +1,12 @@
 {
- "name": "Буфер текстов",
- "short_name": "Буфер",
+ "name": "WPA_wed",
+ "short_name": "WPA_wed",
  "lang": "ru",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
- "background_color": "#f5f3ef",
- "theme_color": "#2f3a4a",
+ "background_color": "#F1ECFF",
+ "theme_color": "#F1ECFF",
  "icons": [
   {
    "src": "icon-192.png",
