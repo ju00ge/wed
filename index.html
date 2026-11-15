@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2f3a4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Буфер">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<title>Буфер текстов</title>
+<style>
+:root{
+  --bg:#f5f3ef;--card:#fff;--ink:#1f2328;--muted:#6b7078;--line:#e3dfd8;
+  --accent:#2f3a4a;--accent-ink:#fff;--soft:#ece8e1;
+  --red:#c62828;--red-soft:#fdecec;--gold:#d29b00;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15171a;--card:#1f2226;--ink:#eceef0;--muted:#9aa0a8;--line:#30343a;
+  --accent:#dfe6ee;--accent-ink:#15171a;--soft:#2a2e33;--red:#ff6b6b;--red-soft:#3a1f22;--gold:#f0c040}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  padding:0 0 calc(24px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:5;background:var(--bg);
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line)}
+.search{display:flex;gap:8px;max-width:760px;margin:0 auto}
+#q{flex:1;min-width:0;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;
+  background:var(--card);color:var(--ink);outline:none}
+#q:focus{border-color:var(--accent)}
+#clear{min-width:46px;border:0;border-radius:12px;background:var(--soft);color:var(--ink);font-size:20px}
+main{max-width:760px;margin:0 auto;padding:12px 14px}
+h2.h{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 2px 8px;font-weight:600}
+.empty{padding:22px 4px;color:var(--muted);font-size:16px}
+.codes{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.codes li{border-top:1px solid var(--line)}
+.codes li:first-child{border-top:0}
+.codes button{all:unset;box-sizing:border-box;display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;min-height:48px;cursor:pointer}
+.codes .n{font-weight:700;min-width:44px;font-variant-numeric:tabular-nums}
+.codes .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.codes .p{font-size:12px;color:var(--muted)}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px}
+.card.warn,.card.draft{border-color:var(--red);border-width:2px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
+.badge{font-size:12px;line-height:1.2;padding:4px 8px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.badge.red{background:var(--red);color:#fff;font-weight:700}
+.num{margin-left:auto;font-size:13px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.title{font-size:17px;font-weight:700;margin:2px 0 6px;word-break:break-word}
+.title.none{font-weight:400;color:var(--muted);font-size:15px}
+.title.none i{font-style:normal;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:6px}
+.text{font-size:15.5px;white-space:pre-wrap;word-break:break-word}
+.draft .text{color:var(--red);font-weight:700}
+mark.blank{background:var(--red-soft);color:var(--red);font-weight:700;border:1px dashed var(--red);border-radius:4px;padding:0 2px}
+.actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.btn{min-height:44px;padding:0 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;flex:1;min-width:140px}
+.btn.icon{min-width:44px;padding:0;font-size:19px}
+.btn.fav-on{color:var(--gold);border-color:var(--gold)}
+.lang{display:inline-flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+.lang button{min-height:41px;min-width:46px;border:0;background:var(--card);color:var(--muted);font-size:14px;font-weight:600}
+.lang button.on{background:var(--soft);color:var(--ink)}
+.numedit{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.numedit input{flex:1;min-width:110px;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink)}
+.numedit .err{width:100%;color:var(--red);font-size:14px}
+footer{max-width:760px;margin:20px auto 0;padding:0 14px;color:var(--muted);font-size:13px}
+footer .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(30px);
+  background:var(--accent);color:var(--accent-ink);padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;
+  transition:.2s;pointer-events:none;max-width:90vw;text-align:center;z-index:9}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.bad{background:var(--red);color:#fff}
+</style>
+</head>
+<body>
+<header>
+  <div class="search">
+    <input id="q" type="text" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false"
+      placeholder="Поиск или номер шаблона" aria-label="Поиск">
+    <button id="clear" aria-label="Очистить">×</button>
+  </div>
+</header>
+<main id="out"></main>
+<footer id="foot"></footer>
+<div id="toast" role="status" aria-live="polite"></div>
+<input id="file" type="file" accept="application/json,.json" hidden>
+<script id="data" type="application/json">[{"id": "x-здравствуйте", "section": "Юр часть", "title": "здравствуйте", "alt": "Hello", "status": "", "code": "11", "ru": "Здравствуйте! Меня зовут Юлия, я буду рада помочь в такой важный момент.", "en": "Hello! My name is Julia, and I’d be happy to help you with something this important."}, {"id": "x-разводВопросы1", "section": "Юр часть", "title": "разводВопросы1", "alt": "Divorce?_1", "status": "", "code": "21", "ru": "Я расскажу вам о процессе развода и рассчитаю стоимость. Для этого подскажите, пожалуйста:\n- верно я понимаю, что брак был заключен в Грузии?\n- развод вы оформляете по обоюдному согласию?\n- нет ли у вас споров об имуществе и детях?", "en": "I’ll explain the divorce process and calculate the cost for you. First, could you please clarify a few things?\n\nAm I right that your marriage was registered in Georgia?\n\nAre you getting divorced by mutual agreement?\n\nAre there any disputes involving property or children?"}, {"id": "x-разводВопросы2", "section": "Юр часть", "title": "разводВопросы2", "alt": "Divorce?_2", "status": "", "code": "22", "ru": "В таком случае смогу помочь вам с расторжением брака.\n\nУточните ещё, пожалуйста:\n- где оба вы сейчас находитесь?\n- есть ли срочность с оформлением и получением документов о разводе?", "en": "In that case, I can help you with the divorce process.\n\nCould you also please let me know:\n\nWhere are both of you currently located?\n\nIs there any urgency regarding the divorce or receiving the divorce documents?"}, {"id": "x-онас", "section": "Юр часть", "title": "онас", "alt": "About Us", "status": "", "code": "23", "ru": "спасибо за ответы! У вас удобная ситуация: так как вы _____ всё оформим по доверенности.\n\nКоротко о нас: с 2021 года оформляем браки и разводы иностранцев в Грузии и помогли более 3 500 пар.\nРаньше я работала в составе агентства, а теперь веду частную практику, поэтому большая часть отзывов осталась у агентства. Часть отзывов моих пар я сохранила в канале:", "en": "Thank you for your answers! Your situation is quite straightforward: since you _____, we can handle the entire process on your behalf through a power of attorney.\n\nA little about us: We’ve been helping foreigners with marriage registration and divorce in Georgia since 2021, and we’ve helped more than 3,500 couples.\n\nI used to work at an agency, but now I run my own practice, so most of the reviews are still on the agency’s page. I’ve saved some reviews from couples I’ve personally helped and shared them on my channel:"}, {"id": "x-зачемушла", "section": "Юр часть", "title": "зачемушла", "alt": "Why I Left", "status": "", "code": "24", "ru": "Я проработала в Art event studio 3,5 года, вот их страница: [ссылка]. Теперь веду своё дело - хочу, чтобы оформление было доступнее. Юридическую часть ведёт тот же специалист, что и в агентстве, а развод у нас выходит на $70–200 дешевле.", "en": "I worked at Art Event Studio for 3.5 years. Here’s their page: [link].\n\nI now run my own practice because I want to make the process more affordable. The legal work is handled by the same specialist who works with the agency, but our divorce services cost $70–$200 less."}, {"id": "n-1", "section": "Разводы › Отличия разводов в разных странах", "title": "", "alt": "", "status": "", "code": "", "ru": "Белорусские решения суда о разводе должно заканчиваться фразой \"ВСТУПИЛО В ЗАКОННУЮ СИЛУ\" иначе не примут.", "en": ""}, {"id": "n-2", "section": "Разводы › Отличия разводов в разных странах", "title": "", "alt": "", "status": "", "code": "", "ru": "Решение суда из России вступает в законную силу только через месяц после выдачи. Затем разведенные должны получить документ свидетельство о разводе,только оно является подтверждением развода.   Процесс: в течение 3-х дней со дня вступления решения суда о разводе в законную силу, суд обязан направить выписку из решения в ЗАГС по месту государственной регистрации заключения этого брака. Эту выписку разведенному также необходимо отнести в ЗАГС, свидетельство о разводе выдадут в день посещения, также можно записаться в ЗАГС через Гос. услуги (зайдите на сайт Госуслуг и выберите услугу «Регистрация расторжения брака по решению суда». Выбирайте подходящую ситуацию (раздельно или совместно). Заполните форму заявления. Оно заключается во внесении в него сведения из решения суда, выбора органа ЗАГС и даты посещения)", "en": ""}, {"id": "n-3", "section": "Разводы › Отличия разводов в разных странах", "title": "", "alt": "", "status": "", "code": "", "ru": "Разводы из Минской конвенции достаточно предоставить в оригинале, без заверения у нотариуса.", "en": ""}, {"id": "n-4", "section": "Разводы › Отличия разводов в разных странах", "title": "", "alt": "", "status": "", "code": "", "ru": "Из Израиля вместо развода подходит Тамцит Ришум - справка о личном статусе", "en": ""}, {"id": "n-5", "section": "Разводы › Развод, когда поженились в Грузии возможен 3-мя способами", "title": "", "alt": "", "status": "", "code": "", "ru": "1) Развод в Грузии по обоюдному согласию. Можно не приезжать, а просто прислать нам доверенность. На подачу заявления о разводе и получением документа требуется 6 рабочих дней. Плюс время на апостиль \\ легализацию и перевод и доставку свидетельств о разводе. Датой развода считается день когда выдали документ.", "en": ""}, {"id": "n-6", "section": "Разводы › Развод, когда поженились в Грузии возможен 3-мя способами", "title": "", "alt": "", "status": "Черновик", "code": "", "ru": "Если развод уже есть и нужно информировать юстицию об этом, то это процесс аннуляции брака. Ожидать документ 10 рабочих дней.  Для грузин, для аннуляции можно предоставить документ о разводе выданный и на имя грузина и на имя его партнера.  Через суд грузия может развести только граждан Грузии. ??? ИЛИ МОЖНО ЧЕРЕЗ СУД. Ждем уточнение от клиента.", "en": ""}, {"id": "n-7", "section": "Разводы › Развод, когда поженились в Грузии возможен 3-мя способами", "title": "", "alt": "", "status": "", "code": "", "ru": "Для оформления развода пара должна присутствовать в юстиции в один момент времени. Нельзя подписать заявление на развод по отдельности. Либо используем доверенность: от 1 супруга или от обоих.", "en": ""}, {"id": "n-8", "section": "Разводы › Развод, когда поженились в Грузии возможен 3-мя способами", "title": "", "alt": "", "status": "", "code": "", "ru": "Если мы разводили пару в Грузии и кто-то из них у нас снова жениться или разводиться, тогда предыдущий док о разводе им предъявлять не требуется, т.к. всё есть в базе данных Грузии.   Если при регистрации брака жена взяла фамилию мужа, и сменила паспорт, то для развода от нее достаточно нового паспорта с фамилией мужа.", "en": ""}, {"id": "n-9", "section": "Разводы › Развод, когда поженились в Грузии возможен 3-мя способами", "title": "", "alt": "", "status": "", "code": "", "ru": "2)) Через суд, в любой другой стране, даже если один из супругов не выходит на связь Если второй супруг не выходит на связь, всё равно разведут. После вступления решения суда в законную силу, когда его уже нельзя оспорить, пара должна предоставить нам это решение суда или свидетельство о разводе, зависит от страны. Мы подадим документ для отметки в базе данных Грузии, подтверждающий документ Грузия не выдает. В подтверждение можем выдать только чек.", "en": ""}, {"id": "n-10", "section": "Разводы › Развод, когда поженились в Грузии возможен 3-мя способами", "title": "", "alt": "", "status": "", "code": "", "ru": "Опровергнуть развод у нас нельзя. Он вступает в силу сразу при подаче заявления на развод, потом просто ждем документы 6-10 дней.", "en": ""}, {"id": "n-11", "section": "Разводы › Развод, когда поженились в Грузии возможен 3-мя способами", "title": "", "alt": "", "status": "", "code": "", "ru": "Дележ имущества происходит не совсем понятно, ничего не обещаем. Стандартное условие в Грузии - нажитое делят пополам, но пара обязательно должна консультироваться с юристом и опираться на законы страны гражданства или ВНЖ.", "en": ""}, {"id": "n-12", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если у молодожена несколько разводов, то предъявляем только последний.", "en": ""}, {"id": "n-13", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если женились в Грузии и развелись, и вновь женятся у нас, обязательно предоставить фото свид. о браке из Грузии, чтобы мы могли сверить написание и иное. О полученном разводе нужно информировать Юстицию до росписи! Если решение суда, то на внесение в систему потребуется 10 рабочих дней, если развод - 1 рабочий день.", "en": ""}, {"id": "n-14", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если при первой подаче вскрылся момент с умолчанием развода и вследствии этого не могут поженить, можно подать заявление на след. день, скорее всего сработает.", "en": ""}, {"id": "n-15", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если хотят предоставить развод, например, жениха, но документ выдан не на имя жениха, а на имя бывшей жены с правом получения для жениха, то мы его не предоставляем, т.к. не примут.", "en": ""}, {"id": "n-16", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если после развода была смена фамилии, но паспорт получен после даты развода, то не нужно свид. о рождении.", "en": ""}, {"id": "n-17", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если решение суда о разводе, а не документ со словом “Развод”, то должна быть графа “Вступило в силу \\ не опровержимо”", "en": ""}, {"id": "n-18", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если пара была жената друг на друге, развелись и снова женятся, то нужны разводы от обоих, но свидетельство о предыдущем браке в 1 экземпляре.", "en": ""}, {"id": "n-19", "section": "Разводы › Другое про разводы", "title": "", "alt": "", "status": "", "code": "", "ru": "Если супруг умер, то нужно лишь свидетельство о смерти.", "en": ""}]</script>
+<script>
+"use strict";
+const VERSION = "2026.11.14-0804639c";
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const BY_ID = Object.fromEntries(DATA.map(e => [e.id, e]));
+
+// Группы синонимов (корни; поиск по вхождению)
+const SYN = [
+  ["развод", "расторж", "divorc"],
+  ["брак", "роспис", "регистрац", "свадьб", "marriage", "married", "wedding"],
+  ["доверенн", "доверк", "attorney"],
+  ["апостил", "легализ", "apostil"],
+  ["паспорт", "загран", "айди", "passport"],
+  ["свидетельств", "свид", "св-в", "certificate"],
+  ["юстиц", "дом юстиции", "justice"],
+  ["цена", "цены", "стоимост", "сколько", "дешевл", "cost", "price"],
+  ["суд", "court"]
+];
+
+const norm = s => (s || "").toLowerCase().replace(/ё/g, "е");
+const BLANK_RE = /_{2,}|\[ссылка\]|\[link\]/gi;
+const hasBlank = s => { BLANK_RE.lastIndex = 0; return BLANK_RE.test(s || ""); };
+const esc = s => (s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const HAY = {};
+DATA.forEach(e => { HAY[e.id] = norm([e.title, e.alt, e.section, e.ru, e.en].join(" \n ")); });
+
+function expand(tok) {
+  const out = new Set([tok]);
+  if (tok.length >= 3) for (const g of SYN) {
+    if (g.some(m => tok.startsWith(m) || m.startsWith(tok))) g.forEach(m => out.add(m));
+  }
+  return [...out];
+}
+function search(q) {
+  const toks = norm(q).split(/\s+/).filter(Boolean);
+  if (!toks.length) return [];
+  const alts = toks.map(expand);
+  return DATA.filter(e => alts.every(a => a.some(v => HAY[e.id].includes(v))));
+}
+
+// ---------- настройки (избранное и личные номера) ----------
+const LS = "bufer.settings.v1";
+let S = { fav: [], nums: {} };
+try { const raw = localStorage.getItem(LS); if (raw) S = sanitize(JSON.parse(raw)); } catch (_) {}
+function sanitize(o) {
+  const r = { fav: [], nums: {} };
+  if (o && Array.isArray(o.fav)) r.fav = o.fav.filter(id => BY_ID[id]);
+  if (o && o.nums && typeof o.nums === "object")
+    for (const [id, n] of Object.entries(o.nums)) if (BY_ID[id] && /^\d{1,6}$/.test(String(n))) r.nums[id] = String(n);
+  return r;
+}
+function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (_) {} }
+
+const OFFICIAL = {};
+DATA.forEach(e => { if (e.code) OFFICIAL[e.code] = e.id; });
+function codeMap() {
+  const m = Object.assign({}, OFFICIAL);
+  for (const [id, n] of Object.entries(S.nums)) if (!m[n] && !BY_ID[id].code) m[n] = id;
+  return m;
+}
+function codeOf(e) { return e.code || S.nums[e.id] || ""; }
+function checkNum(n, id) {
+  if (!/^\d{1,6}$/.test(n)) return "Только цифры, до 6 знаков";
+  if (OFFICIAL[n]) return "Номер " + n + " уже официальный — его нельзя занять";
+  for (const [c, cid] of Object.entries(codeMap())) {
+    if (cid === id) continue;
+    if (c === n) return "Номер " + n + " уже занят";
+    if (c.startsWith(n) || n.startsWith(c)) return "Конфликт с номером " + c + " (один начинается с другого)";
+  }
+  return "";
+}
+
+// ---------- копирование ----------
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
+  try {
+    const keep = document.activeElement;
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy"); ta.remove();
+    if (keep && keep.focus) keep.focus({ preventScroll: true });
+    return ok;
+  } catch (_) { return false; }
+}
+let tTimer;
+function toast(msg, bad) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "show" + (bad ? " bad" : "");
+  clearTimeout(tTimer); tTimer = setTimeout(() => t.className = "", 1800);
+}
+
+// ---------- карточка ----------
+const langOf = {}; // id -> "ru"|"en"
+const textOf = e => (langOf[e.id] === "en" && e.en) ? e.en : e.ru;
+function hl(s) {
+  let out = "", last = 0, m; BLANK_RE.lastIndex = 0;
+  while ((m = BLANK_RE.exec(s))) { out += esc(s.slice(last, m.index)) + '<mark class="blank">' + esc(m[0]) + "</mark>"; last = m.index + m[0].length; }
+  return out + esc(s.slice(last));
+}
+function cardHTML(e) {
+  const txt = textOf(e), warn = hasBlank(txt), draft = e.status === "Черновик";
+  const c = codeOf(e), fav = S.fav.includes(e.id);
+  const title = e.title
+    ? '<div class="title">' + esc(e.title) + "</div>"
+    : '<div class="title none">' + esc(e.ru.slice(0, 45)) + (e.ru.length > 45 ? "…" : "") + "<i>нет названия</i></div>";
+  return '<article class="card' + (warn ? " warn" : "") + (draft ? " draft" : "") + '" data-id="' + esc(e.id) + '">' +
+    '<div class="meta"><span class="badge">' + esc(e.section) + "</span>" +
+    (draft ? '<span class="badge red">Черновик</span>' : "") +
+    (warn ? '<span class="badge red">!!! заполнить перед отправкой</span>' : "") +
+    (c ? '<span class="num">№ ' + esc(c) + (e.code ? "" : " · личный") + "</span>" : "") + "</div>" +
+    title + '<div class="text">' + hl(txt) + "</div>" +
+    '<div class="actions"><button class="btn primary" data-act="copy">Копировать</button>' +
+    (e.en ? '<span class="lang"><button data-act="ru" class="' + (langOf[e.id] !== "en" ? "on" : "") + '">RU</button><button data-act="en" class="' + (langOf[e.id] === "en" ? "on" : "") + '">EN</button></span>' : "") +
+    '<button class="btn icon' + (fav ? " fav-on" : "") + '" data-act="fav" aria-label="Избранное">' + (fav ? "★" : "☆") + "</button>" +
+    (e.code ? "" : '<button class="btn icon" data-act="num" aria-label="Личный номер">#</button>') +
+    "</div></article>";
+}
+
+// ---------- экраны ----------
+const out = document.getElementById("out"), q = document.getElementById("q");
+function render() {
+  const v = q.value.trim();
+  if (!v) return renderHome();
+  if (/^\d+$/.test(v)) return renderCode(v);
+  const res = search(v);
+  out.innerHTML = res.length ? res.map(cardHTML).join("") : '<div class="empty">Точного шаблона по этому запросу в базе нет</div>';
+}
+function renderHome() {
+  const cm = codeMap();
+  const codes = Object.keys(cm).sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+  let h = "";
+  if (codes.length) h += '<h2 class="h">Коды</h2><ul class="codes">' + codes.map(c => {
+    const e = BY_ID[cm[c]];
+    return '<li><button data-code="' + esc(c) + '"><span class="n">' + esc(c) + '</span><span class="t">' +
+      esc(e.title || e.ru.slice(0, 60)) + "</span>" + (e.code ? "" : '<span class="p">личный</span>') + "</button></li>";
+  }).join("") + "</ul>";
+  const favs = S.fav.map(id => BY_ID[id]).filter(Boolean);
+  h += '<h2 class="h">Избранное</h2>' + (favs.length ? favs.map(cardHTML).join("") : '<div class="empty">Пока пусто — нажмите ☆ на карточке</div>');
+  out.innerHTML = h;
+}
+let lastAuto = "";
+function renderCode(v) {
+  const cm = codeMap(), id = cm[v];
+  if (id) {
+    out.innerHTML = cardHTML(BY_ID[id]);
+    if (lastAuto !== v) {
+      lastAuto = v;
+      copyText(textOf(BY_ID[id])).then(ok => ok ? toast("Скопировано: № " + v) : toast("Нажмите «Копировать»", true));
+    }
+    return;
+  }
+  const pref = Object.keys(cm).filter(c => c.startsWith(v));
+  out.innerHTML = pref.length
+    ? pref.map(c => cardHTML(BY_ID[cm[c]])).join("")
+    : '<div class="empty">Шаблона с номером ' + esc(v) + " нет</div>";
+}
+function renderFoot() {
+  document.getElementById("foot").innerHTML =
+    '<div class="row"><button class="btn" id="exp">Скачать настройки</button><button class="btn" id="imp">Загрузить настройки</button></div>' +
+    "<div>Записей в базе: " + DATA.length + " · версия " + esc(VERSION) + "</div>";
+  document.getElementById("exp").onclick = exportSettings;
+  document.getElementById("imp").onclick = () => document.getElementById("file").click();
+}
+
+// ---------- события ----------
+q.addEventListener("input", () => { if (!/^\d+$/.test(q.value.trim())) lastAuto = ""; render(); });
+document.getElementById("clear").onclick = () => { q.value = ""; lastAuto = ""; render(); q.focus(); };
+out.addEventListener("click", async ev => {
+  const cb = ev.target.closest("[data-code]");
+  if (cb) { q.value = cb.dataset.code; lastAuto = ""; render(); return; }
+  const b = ev.target.closest("[data-act]"); if (!b) return;
+  const card = b.closest(".card"), e = BY_ID[card.dataset.id], act = b.dataset.act;
+  if (act === "copy") { const ok = await copyText(textOf(e)); toast(ok ? "Скопировано" : "Не удалось скопировать", !ok); }
+  else if (act === "ru" || act === "en") { langOf[e.id] = act; card.outerHTML = cardHTML(e); }
+  else if (act === "fav") {
+    S.fav = S.fav.includes(e.id) ? S.fav.filter(x => x !== e.id) : S.fav.concat(e.id); save();
+    if (!q.value.trim()) render(); else card.outerHTML = cardHTML(e);
+  }
+  else if (act === "num") openNum(card, e);
+  else if (act === "numsave") {
+    const inp = card.querySelector(".numedit input"), n = inp.value.trim(), err = checkNum(n, e.id);
+    if (err) { card.querySelector(".numedit .err").textContent = err; return; }
+    S.nums[e.id] = n; save(); toast("Личный номер " + n + " сохранён"); card.outerHTML = cardHTML(e);
+  }
+  else if (act === "numdel") { delete S.nums[e.id]; save(); card.outerHTML = cardHTML(e); if (!q.value.trim()) render(); }
+});
+function openNum(card, e) {
+  if (card.querySelector(".numedit")) return;
+  const d = document.createElement("div"); d.className = "numedit";
+  d.innerHTML = '<input inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Личный номер" value="' + esc(S.nums[e.id] || "") + '">' +
+    '<button class="btn" data-act="numsave">Сохранить</button>' + (S.nums[e.id] ? '<button class="btn" data-act="numdel">Удалить</button>' : "") + '<div class="err"></div>';
+  card.appendChild(d); d.querySelector("input").focus();
+}
+function exportSettings() {
+  const blob = new Blob([JSON.stringify({ app: "bufer", version: 1, saved: new Date().toISOString(), fav: S.fav, nums: S.nums }, null, 1)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "bufer-nastroyki.json";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+document.getElementById("file").addEventListener("change", async ev => {
+  const f = ev.target.files[0]; ev.target.value = ""; if (!f) return;
+  try {
+    const r = sanitize(JSON.parse(await f.text()));
+    for (const [id, n] of Object.entries(r.nums)) if (checkNumAgainst(n, id, r.nums)) delete r.nums[id];
+    S = r; save(); render(); toast("Настройки загружены");
+  } catch (_) { toast("Файл не подходит", true); }
+});
+function checkNumAgainst(n, id, nums) {
+  if (OFFICIAL[n] || BY_ID[id].code) return true;
+  for (const c of Object.keys(OFFICIAL)) if (c.startsWith(n) || n.startsWith(c)) return true;
+  for (const [oid, c] of Object.entries(nums)) if (oid !== id && (c.startsWith(n) || n.startsWith(c))) return true;
+  return false;
+}
+
+render(); renderFoot();
+
+// ---------- PWA: офлайн и автообновление ----------
+if ("serviceWorker" in navigator) {
+  let hadCtrl = !!navigator.serviceWorker.controller, pending = false;
+  const reload = () => { if (!q.value.trim() && document.activeElement !== q) location.reload(); else pending = true; };
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadCtrl) reload(); hadCtrl = true; });
+  navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then(reg => {
+    const check = () => reg.update().catch(() => {});
+    setInterval(check, 30 * 60 * 1000);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") { if (pending) location.reload(); else check(); }
+    });
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>
